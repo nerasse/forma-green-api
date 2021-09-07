@@ -54,6 +54,8 @@ app.use(function (req, res, next) {
 const router = express.Router();
 app.use("/user", router);
 require(__dirname + "/controllers/user/userController")(router);
+app.use("/benevole", router);
+require(__dirname + "/controllers/benevole/benevoleController")(router);
 app.use("/test", router);
 require(__dirname + "/controllers/testController")(router);
 

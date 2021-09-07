@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 require('mongoose-type-email');
 
-const memberModel = mongoose.Schema(
+const benevoleModel = mongoose.Schema(
   {
     nom: {
       type: String,
@@ -15,8 +15,13 @@ const memberModel = mongoose.Schema(
       unique: true,
       required: true
     },
-    password: {
-      type: String,
+    partnerships: {
+      type: [String],
+      required: true,
+      trim: true
+    },
+    date_fin_abo: {
+      type: Date,
       required: true
     },
     etablissement: {
@@ -24,12 +29,12 @@ const memberModel = mongoose.Schema(
       required: true,
       trim: true
     },
-    admin: {
-      type: Boolean,
+    password: {
+      type: String,
       required: true
     }
   },
   { timestamps: { createdAt: "created_at" } }
 );
 
-module.exports = mongoose.model("Member", memberModel);
+module.exports = mongoose.model("Benevole", benevoleModel);

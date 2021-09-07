@@ -49,7 +49,7 @@ async function register(req, res) {
     // Sauvegarde de user dans la base de données
     const userData = new User(user);
     const userObject = await userData.save();
-    return res.status(200).json({token: jwt.sign({email: user.email, name: user.name, _id: user.id}, config.secret)});
+    return res.status(200).json({token: jwt.sign({email: user.email, name: user.name, _id: user.id, type: 'admin' }, config.secret)});
   } catch (error) {
     return res.status(500).json({ error });
   }
@@ -74,7 +74,7 @@ async function login(req, res) {
       return res.status(401).json({
         text: "Mot de passe incorrect"
       });
-    return res.status(200).json({token: jwt.sign({email: findUser.email, name: findUser.name, _id: findUser.id}, config.secret)});
+    return res.status(200).json({token: jwt.sign({email: findUser.email, name: findUser.name, _id: findUser.id, type: 'admin' }, config.secret)});
   } catch (error) {
     return res.status(500).json({
       error

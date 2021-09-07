@@ -49,7 +49,7 @@ async function register(req, res) {
     // Sauvegarde de user dans la base de données
     const memberData = new Member(memeber);
     const memeberObject = await memeberData.save();
-    return res.status(200).json({memberToken: jwt.sign({email: memeber.email, name: memeber.name, _id: memeber.id, type: 'member'}, config.secret)});
+    return res.status(200).json({token: jwt.sign({email: memeber.email, name: memeber.name, _id: memeber.id}, config.secret)});
   } catch (error) {
     return res.status(500).json({ error });
   }
@@ -74,7 +74,7 @@ async function login(req, res) {
       return res.status(401).json({
         text: "Mot de passe incorrect"
       });
-    return res.status(200).json({memberToken: jwt.sign({email: findMember.email, name: findMember.name, _id: findMember.id, type: 'member'}, config.secret)});
+    return res.status(200).json({token: jwt.sign({email: findMember.email, name: findMember.name, _id: findMember.id}, config.secret)});
   } catch (error) {
     return res.status(500).json({
       error
@@ -91,16 +91,16 @@ const loginRequired = (req, res, next) => {
 }
 
 async function infoUser(req, res) {
-  const { memberToken } = req.body;
+  const { token } = req.body;
   //vérifie si le token est présent
-  if (!memberToken) { 
+  if (!token) { 
     return res.status(400).json({
       text: "Requête invalide"
     });
   }
   try {
     let findEmail = '';
-    jwt.verify(memberToken, config.secret, function(err, decoded) {
+    jwt.verify(token, config.secret, function(err, decoded) {
       dataName = decoded.name;
       findEmail = decoded.email;
     });
