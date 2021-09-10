@@ -3,6 +3,7 @@ const Member = require("../../models/memberModel.js");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require("../../config/config");
+const { find } = require("../../models/benevoleModel.js");
 
 const regexPassword = /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,}))/g;
 const regexName = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
@@ -137,7 +138,7 @@ async function memberModif(req, res) {
   }
   if (newPassword) {
     try {
-      await User.update({ email: email }, {
+      await Benevole.updateOne({ email: email }, {
         nom,
         email: finalEmail,
         partnerships,
@@ -151,7 +152,7 @@ async function memberModif(req, res) {
     }
   } else {
     try {
-      await User.update({ email: email }, {
+      await Benevole.updateOne({ email: email }, {
         nom,
         email: finalEmail,
         partnerships,
@@ -165,19 +166,56 @@ async function memberModif(req, res) {
   }
 }
 
+async function deleteBenevole(req, res) {
+  const { email, memberEtablissement, memberToken } = req.body;
+    //email et password non null
+    if (!email || !memberEtablissement) {
+      return res.status(400).json({
+        text: "Requête invalide"
+      });
+    }
+  //vérification du token
+  if (!memberToken) {
+    return res.status(400).json({
+      text: "Requête invalide"
+    });
+  }
+  try {
+    let mail = '';
+    jwt.verify(memberToken, config.secret, function (err, decoded) {
+      mail = decoded.email;
+    });
+    const findMember = await Member.findOne({ email: mail });
+    if (!findMember)
+        return res.status(401).json({
+          text: "Token invalide !"
+        });
+      const findBenevole = await Benevole.findOne({ email });
+      if (!findBenevole)
+        return res.status(401).json({
+          text: "Requête invalide !"
+        });
+      if (!findMember.admin && findBenevole.etablissement != findMember.etablissement) {
+        return res.status(401).json({
+          text: "Requête invalide !"
+        });
+      }
+      await Benevole.deleteOne({ email: email });
+  } catch (error) {
+    return res.status(500).json({
+      error
+    });
+  }
+}
+
 async function benevoleModif(req, res) {
-  const { password, newPassword, email, newEmail, nom, benevoleToken } = req.body;
+  const { password, newPassword, email, newEmail, benevoleToken } = req.body;
   let newEtablissement = etablissement;
   let finalEmail = email;
   //email et password non null
   if (!email || !password) {
     return res.status(400).json({
       text: "Requête invalide"
-    });
-  }
-  if (!regexName.test(nom)) {
-    return res.status(400).json({
-      text: "Nom Invalide"
     });
   }
   if (!regexPassword.test(password) || !newPassword ) {
@@ -212,8 +250,7 @@ async function benevoleModif(req, res) {
   }
   if (newPassword) {
     try {
-      await User.update({ email: email }, {
-        nom,
+      await Benevole.updateOne({ email: email }, {
         email: finalEmail,
         password: bcrypt.hashSync(password, 10)
       });
@@ -223,8 +260,7 @@ async function benevoleModif(req, res) {
     }
   } else {
     try {
-      await User.update({ email: email }, {
-        nom,
+      await Benevole.updateOne({ email: email }, {
         email: finalEmail
       });
       return res.status(200).json({ text: 'benevole modifié dans la base !' });
@@ -301,3 +337,4 @@ exports.register = register;
 exports.info = info;
 exports.memberModif = memberModif;
 exports.benevoleModif = benevoleModif;
+exports.deleteBenevole = deleteBenevole;

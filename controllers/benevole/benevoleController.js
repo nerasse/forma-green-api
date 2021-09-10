@@ -5,5 +5,6 @@ module.exports = function (app) {
     app.post('/register',compte.register);
     app.post('/benevoleModif',compte.benevoleModif);
     app.post('/memberModif',compte.memberModif);
+    app.post('/deleteBenevole',compte.deleteBenevole);
     app.post('/info',compte.info);
 }
