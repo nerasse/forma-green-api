@@ -1,4 +1,4 @@
-const Member = require("../../models/memeberModel.js");
+const Member = require("../../models/memberModel.js");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require("../../config/config");
@@ -74,6 +74,7 @@ async function login(req, res) {
       return res.status(401).json({
         text: "Mot de passe incorrect"
       });
+      
     return res.status(200).json({memberToken: jwt.sign({email: findMember.email, name: findMember.name, _id: findMember.id, type: 'member'}, config.secret)});
   } catch (error) {
     return res.status(500).json({
@@ -82,15 +83,36 @@ async function login(req, res) {
   }
 }
 
-const loginRequired = (req, res, next) => {
-    if (req.user) {
-        next();
-    } else {
-        return res.status(401).json({message: 'Unauthorized memeber !'});
-    }
+async function info(req, res) {
+  const { memberToken } = req.body;
+  //vérifie si le token est présent
+  if (!memberToken) { 
+    return res.status(400).json({
+      text: "Requête invalide"
+    });
+  }
+  try {
+    let findEmail = '';
+    jwt.verify(memberToken, config.secret, function(err, decoded) {
+      dataName = decoded.name;
+      findEmail = decoded.email;
+    });
+    const findMember = await Member.findOne({ email: findEmail });
+    if (!findMember)
+      return res.status(401).json({
+        text: "Le memebre n'existe pas"
+      });
+    const name = findMember.name;
+    const email = findMember.email;
+    return res.status(200).json({name, email});
+  } catch (error) {
+    return res.status(500).json({
+      error
+    });
+  }
 }
 
-async function infoUser(req, res) {
+async function info(req, res) {
   const { memberToken } = req.body;
   //vérifie si le token est présent
   if (!memberToken) { 
@@ -123,5 +145,4 @@ async function infoUser(req, res) {
 //export
 exports.login = login;
 exports.register = register;
-exports.loginRequired = loginRequired;
-exports.infoUser = infoUser;
+exports.info = info;

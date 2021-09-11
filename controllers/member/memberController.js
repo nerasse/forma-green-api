@@ -1,7 +1,7 @@
-const compte = require('./lib.js');
+const lib = require('./memberLib.js');
+var router = require('express').Router();
 
-module.exports = function (app) {
-    app.post('/login',compte.login);
-    app.post('/register',compte.register);
-    app.post('/info',compte.infoUser);
-}
+router.post('/login', lib.login);
+router.post('/register', lib.register);
+
+module.exports = router;

@@ -1,7 +1,6 @@
 const userLib = require('./userLib.js');
+var router = require('express').Router();
 
-module.exports = function (app) {
-    app.post('/login',userLib.login);
-    app.post('/register',userLib.register);
-    app.post('/info',userLib.infoUser);
-}
+router.get('/dev',userLib.dev);
+
+module.exports = router;

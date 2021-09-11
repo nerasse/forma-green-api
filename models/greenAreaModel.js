@@ -8,13 +8,13 @@ const greenAreaModel = mongoose.Schema(
       required: true,
       trim: true
     },
-    Coordonnees: {
-      type: String,
+    coordonnees: {
+      type: [String],
       required: true,
       trim: true
     },
-    etablissements: {
-      type: [String],
+    etablissement: {
+      type: String,
       required: true,
       trim: true
     },

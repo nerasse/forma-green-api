@@ -3,7 +3,6 @@ const Member = require("../../models/memberModel.js");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require("../../config/config");
-const { find } = require("../../models/benevoleModel.js");
 
 const regexPassword = /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,}))/g;
 const regexName = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
@@ -39,13 +38,13 @@ async function register(req, res) {
       mail = decoded.email
     });
     const findMember = await Member.findOne({ email: mail });
-      if (!findMember)
-        return res.status(401).json({
-          text: "Token invalide !"
-        });
-      if (findMember.admin == false) {
-        newEtablissement = findMember.etablissement
-      }
+    if (!findMember)
+      return res.status(401).json({
+        text: "Token invalide !"
+      });
+    if (findMember.admin === false) {
+      newEtablissement = findMember.etablissement
+    }
   } catch (error) {
     return res.status(500).json({
       error
@@ -57,7 +56,7 @@ async function register(req, res) {
     email,
     partnerships,
     date_fin_abo,
-    newEtablissement,
+    etablissement: newEtablissement,
     password: bcrypt.hashSync(password, 10)
   };
   // verif dans la base si déjà existant
@@ -87,22 +86,22 @@ async function memberModif(req, res) {
   const { password, newPassword, email, newEmail, nom, partnerships, date_fin_abo, etablissement, memberEtablissement, memberToken } = req.body;
   let newEtablissement = etablissement;
   let finalEmail = email;
-    //email et password non null
-    if (!email || !password) {
-      return res.status(400).json({
-        text: "Requête invalide"
-      });
-    }
-    if (!regexName.test(nom)) {
-      return res.status(400).json({
-        text: "Nom Invalide"
-      });
-    }
-    if (!regexPassword.test(password) || !newPassword ) {
-      return res.status(400).json({
-        text: "Password Invalide"
-      });
-    }
+  //email et password non null
+  if (!email || !password) {
+    return res.status(400).json({
+      text: "Requête invalide"
+    });
+  }
+  if (!regexName.test(nom)) {
+    return res.status(400).json({
+      text: "Nom Invalide"
+    });
+  }
+  if (!regexPassword.test(password) || !newPassword) {
+    return res.status(400).json({
+      text: "Password Invalide"
+    });
+  }
   //vérification du token
   if (!memberToken) {
     return res.status(400).json({
@@ -116,24 +115,24 @@ async function memberModif(req, res) {
     });
     const findMember = await Member.findOne({ email: mail });
     if (!findMember)
-        return res.status(401).json({
-          text: "Token invalide !"
-        });
-      const findBenevole = await Benevole.findOne({ email });
-      if (!findBenevole)
-        return res.status(401).json({
-          text: "Requête invalide !"
-        });
-      if (findMember.admin == false) {
-        newEtablissement = await Benevole.findOne({ email }).etablissement;
-      }
+      return res.status(401).json({
+        text: "Token invalide !"
+      });
+    const findBenevole = await Benevole.findOne({ email });
+    if (!findBenevole)
+      return res.status(401).json({
+        text: "Requête invalide !"
+      });
+    if (findMember.admin === false) {
+      newEtablissement = await Benevole.findOne({ email }).etablissement;
+    }
   } catch (error) {
     return res.status(500).json({
       error
     });
   }
   // modification du benevole
-  if (email != newEmail) {
+  if (email !== newEmail) {
     finalEmail = newEmail;
   }
   if (newPassword) {
@@ -168,12 +167,12 @@ async function memberModif(req, res) {
 
 async function deleteBenevole(req, res) {
   const { email, memberEtablissement, memberToken } = req.body;
-    //email et password non null
-    if (!email || !memberEtablissement) {
-      return res.status(400).json({
-        text: "Requête invalide"
-      });
-    }
+  //email et password non null
+  if (!email || !memberEtablissement) {
+    return res.status(400).json({
+      text: "Requête invalide"
+    });
+  }
   //vérification du token
   if (!memberToken) {
     return res.status(400).json({
@@ -187,20 +186,20 @@ async function deleteBenevole(req, res) {
     });
     const findMember = await Member.findOne({ email: mail });
     if (!findMember)
-        return res.status(401).json({
-          text: "Token invalide !"
-        });
-      const findBenevole = await Benevole.findOne({ email });
-      if (!findBenevole)
-        return res.status(401).json({
-          text: "Requête invalide !"
-        });
-      if (!findMember.admin && findBenevole.etablissement != findMember.etablissement) {
-        return res.status(401).json({
-          text: "Requête invalide !"
-        });
-      }
+      return res.status(401).json({
+        text: "Token invalide !"
+      });
+    const findBenevole = await Benevole.findOne({ email });
+    if (!findBenevole)
+      return res.status(401).json({
+        text: "Requête invalide !"
+      });
+    if (findMember.admin || findBenevole.etablissement === findMember.etablissement) {
       await Benevole.deleteOne({ email: email });
+    }
+    return res.status(401).json({
+      text: "pas bon"
+    });
   } catch (error) {
     return res.status(500).json({
       error
@@ -210,7 +209,6 @@ async function deleteBenevole(req, res) {
 
 async function benevoleModif(req, res) {
   const { password, newPassword, email, newEmail, benevoleToken } = req.body;
-  let newEtablissement = etablissement;
   let finalEmail = email;
   //email et password non null
   if (!email || !password) {
@@ -218,7 +216,7 @@ async function benevoleModif(req, res) {
       text: "Requête invalide"
     });
   }
-  if (!regexPassword.test(password) || !newPassword ) {
+  if (!regexPassword.test(password) || !newPassword) {
     return res.status(400).json({
       text: "Password Invalide"
     });
@@ -235,17 +233,17 @@ async function benevoleModif(req, res) {
       mail = decoded.email;
     });
     const findBenevole = await Member.findOne({ email: mail });
-      if (!findBenevole)
-        return res.status(401).json({
-          text: "Token invalide !"
-        });
+    if (!findBenevole)
+      return res.status(401).json({
+        text: "Token invalide !"
+      });
   } catch (error) {
     return res.status(500).json({
       error
     });
   }
   // modification du benevole
-  if (email != newEmail) {
+  if (email !== newEmail) {
     finalEmail = newEmail;
   }
   if (newPassword) {
@@ -312,16 +310,16 @@ async function info(req, res) {
       mail = decoded.email;
     });
     const findMember = await Member.findOne({ email: mail });
-      if (!findMember)
-        return res.status(401).json({
-          text: "requête invalide !"
-        });
-      if (findMember.admin) {
-        data = await Benevole.find({});
-      } else {
-        data = await Member.find({ etablissement: findMember.etablissement });
-      }
-      console.log(data)
+    if (!findMember)
+      return res.status(401).json({
+        text: "requête invalide !"
+      });
+    if (findMember.admin) {
+      data = await Benevole.find({});
+    } else {
+      data = await Member.find({ etablissement: findMember.etablissement });
+    }
+    console.log(data)
     return res.status(200).json({ benevole: data });
   } catch (error) {
     return res.status(500).json({

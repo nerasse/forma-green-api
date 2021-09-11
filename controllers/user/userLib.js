@@ -1,136 +1,28 @@
 const User = require("../../models/userModel.js");
+const Member = require("../../models/memberModel.js");
+const Benevole = require("../../models/benevoleModel.js");
+const ModelDev = require("../../models/greenAreaModel.js");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require("../../config/config");
 
-const regexUsername = /^[a-z0-9_-]{3,16}$/g;
-const regexPassword = /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,}))/g;
-const regexName = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
-
-async function register(req, res) {
-  const { password, email , name} = req.body;
-  //email et password non null
-  if (!email || !password) {
-    return res.status(400).json({
-      text: "Requête invalide"
-    });
+async function dev(req, res) {
+  const add = async function () {
+    const Benevole = require('../../models/benevoleModel');
+    const mdp = await bcrypt.hashSync('Azerty01', 10)
+    const newDate = new Date('2021-12-31T23:59:59');
+    const data = {
+      nom: 'Green Area 7',
+      coordonnees: ['48.84003425274501', '2.3178773853974457'],
+      etablissement: '613d2ddc5d4023e52376eeaa',
+      plantes: ['Cactus', 'Tulipe']
+    };
+    const Data = new ModelDev(data);
+    const Object = await Data.save()
   }
-  if (!regexName.test(name)) {
-    return res.status(400).json({
-      text: "Name Invalide"
-    });
-  }
-  regexPassword.test(password);
-  if (!regexPassword.test(password)) {
-    return res.status(400).json({
-      text: "Password Invalide"
-    });
-  }
-  // hash du password
-  const user = {
-    name,
-    email,
-    password: bcrypt.hashSync(password, 10)
-  };
-  // verif dans la base si déjà existant
-  try {
-    const findUser = await User.findOne({
-      email
-    });
-    if (findUser) {
-      return res.status(400).json({
-        text: "L'utilisateur existe déjà"
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({ error });
-  }
-  try {
-    // Sauvegarde de user dans la base de données
-    const userData = new User(user);
-    const userObject = await userData.save();
-    return res.status(200).json({token: jwt.sign({email: user.email, name: user.name, _id: user.id, type: 'admin' }, config.secret)});
-  } catch (error) {
-    return res.status(500).json({ error });
-  }
-}
-
-async function login(req, res) {
-  const { password, email } = req.body;
-  //email et password non null
-  if (!email || !password) { 
-    return res.status(400).json({
-      text: "Requête invalide"
-    });
-  }
-  try {
-    // verif dans la base si existant
-    const findUser = await User.findOne({ email });
-    if (!findUser)
-      return res.status(401).json({
-        text: "L'utilisateur n'existe pas"
-      });
-    if (!bcrypt.compareSync(password, findUser.password))
-      return res.status(401).json({
-        text: "Mot de passe incorrect"
-      });
-    return res.status(200).json({token: jwt.sign({email: findUser.email, name: findUser.name, _id: findUser.id, type: 'admin' }, config.secret)});
-  } catch (error) {
-    return res.status(500).json({
-      error
-    });
-  }
-}
-
-const loginRequired = (req, res, next) => {
-    if (req.user) {
-        next();
-    } else {
-        return res.status(401).json({message: 'Unauthorized user !'});
-    }
-}
-
-async function infoUser(req, res) {
-  const { token } = req.body;
-  //vérifie si le token est présent
-  if (!token) { 
-    return res.status(400).json({
-      text: "Requête invalide"
-    });
-  }
-  try {
-    let findEmail = '';
-    jwt.verify(token, config.secret, function(err, decoded) {
-      dataName = decoded.name;
-      findEmail = decoded.email;
-    });
-    const findUser = await User.findOne({ email: findEmail });
-    if (!findUser)
-      return res.status(401).json({
-        text: "L'utilisateur n'existe pas"
-      });
-    const name = findUser.name;
-    const email = findUser.email;
-    return res.status(200).json({name, email});
-  } catch (error) {
-    return res.status(500).json({
-      error
-    });
-  }
-}
-
-
-
-async function test(req, res) {
-  return res.status(200).json({test: "ok"});
+  //add();
+  return res.status(200).json({ test: "okkk" });
 }
 
 //export
-exports.login = login;
-exports.register = register;
-exports.loginRequired = loginRequired;
-exports.infoUser = infoUser;
-
-
-
-exports.test = test;
+exports.dev = dev;
