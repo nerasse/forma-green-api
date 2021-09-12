@@ -48,9 +48,10 @@ async function ajout(req, res) {
 
 async function data(req, res) {
   try {
-
+    console.log('yes papa')
     const data = await FormingStructure.find({});
     return res.status(200).json({ data: data })
+    
 
   } catch (error) {
     return res.status(500).json({

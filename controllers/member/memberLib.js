@@ -75,7 +75,7 @@ async function login(req, res) {
         text: "Mot de passe incorrect"
       });
       
-    return res.status(200).json({memberToken: jwt.sign({email: findMember.email, name: findMember.name, _id: findMember.id, type: 'member'}, config.secret)});
+    return res.status(200).json({memberToken: jwt.sign({email: findMember.email, name: findMember.name, _id: findMember.id, type: 'member'}, config.secret), admin: findMember.admin});
   } catch (error) {
     return res.status(500).json({
       error

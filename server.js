@@ -55,6 +55,9 @@ app.use('/member', require('./controllers/member/memberController'));
 app.use('/user', require('./controllers/user/userController'));
 app.use('/benevole', require('./controllers/benevole/benevoleController'));
 app.use('/donation', require('./controllers/donation/donationController'));
+app.use('/forming', require('./controllers/formingStructure/formingStructureController'));
+app.use('/partnership', require('./controllers/partnership/partnershipController'));
+app.use('/greenarea', require('./controllers/greenarea/greenAreaController'));
 
 //Définition et mise en place du port d'écoute
 const port = process.env.PORT || 8800;
